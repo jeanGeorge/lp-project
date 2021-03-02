@@ -1,0 +1,6 @@
+TODO LIST
+- Implementar o parser em PlcParser.lex e PlcParser.yacc de acorco com a sintaxe da seção 4.
+- Implementar métodos do PlcParserAux.sml
+- Implementar função teval em PlcChecker.sml
+- Implementar função eval em PlcInterp.sml
+- Implementar função run em Plc.sml, que usa os métodos teval e eval.
