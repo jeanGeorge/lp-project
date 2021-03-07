@@ -11,7 +11,25 @@ type lexresult = (slvalue, pos)token
 fun keyword (s, lpos, rpos) =
     case s of
         "var" => VAR(lpos, rpos)
-        | _ => NAME(s, lpos, rpos)
+        | "Bool" => CBOOL(s, lpos, rpos)
+        | "else" => ELSE(lpos, rpos)
+        | "and" => AND(lpos, rpos)
+        | "false" => CBOOL(false, lpos, rpos)
+        | "fn" => FUN(lpos, rpos)
+        | "fun" => FUN(lpos, rpos)
+        | "hd" => HEAD(lpos, rpos)
+        | "if" => IF(lpos, rpos)
+        | "Int" => CINT(strToInt(S), lpos, rpos)
+        | "ise" => ISE(lpos, rpos)
+        | "match" => MATCH(lpos, rpos)
+        | "Nil" => NIL(lpos, rpos)
+        | "print" => PRINT(s, lpos, rpos)
+        | "rec" => REC(lpos, rpos)
+        | "then" => THEN(lpos, rpos)
+        | "tl" => TL(lpos, rpos)
+        | "true" => CBOOL(true,lpos, rpos)
+        | "with" => WITH(lpos, rpos)
+        | _ => NAME(lpos, rpos)
 
 (* A function to print a message error on the screen. *)
 val error = fn x => TextIO.output(TextIO.stdOut, x ^ "\n")
@@ -52,3 +70,13 @@ identifier=[a-zA-Z_][a-zA-Z0-9_]*;
 {boolTrue} => (CBOOL(true, yypos, yypos));
 {boolFalse} => (CBOOL(false, yypos, yypos));
 {identifier} => (keyword(yytext, yypos, yypos));
+"+" => (PLUS(yypos, yypos));
+"-" => (MINUS(yypos, yypos));
+"*" => (MULTI(yypos, yypos));
+"/" => (DIV(yypos, yypos));
+"(" => (LPAR(yypos, yypos));
+")" => (RPAR(yypos, yypos));
+"=" => (EQ(yypos, yypos));
+";" => (SEMIC(yypos, yypos));
+. => (errror("\n***Lexer error: bad character ***\n"); raise
+Fail("Lexer error: bad character " ^ yytext));
