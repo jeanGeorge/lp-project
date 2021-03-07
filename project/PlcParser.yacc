@@ -4,7 +4,7 @@
 
 %pos int
 
-%term VAR | FUN | FUNREC | ANONFUN
+%term VAR | FUN | FUNREC | ANONFUN | ANONARR | END
     | IF | THEN | ELSE
     | MATCH | WITH
     | NOT | AND | OR
@@ -13,13 +13,13 @@
     | PRINT
     | PLUS | MINUS | MULTI | DIV
     | EQ | NEQ | LT | LTE | GT | GTE
-    | SEMIC | COMMA | DCOLON | RARROW | PIPE | UNDERLINE | LPAR | RPAR | LSBRAC | RSBRAC | LCBRAC | RCBRAC
+    | SEMIC | COMMA | COLON | DCOLON | RARROW | PIPE | UNDERLINE | LPAR | RPAR | LSBRAC | RSBRAC | LCBRAC | RCBRAC
     | NAME of string
     | CONI of int | CONB of bool
-    | NIL
+    | NIL | BOOL | INT
 
 %nonterm Prog of expr | Expr of expr | Decl of expr | AtomExpr of expr | AppExpr of expr | Const of expr | Comps of expr | MatchExpr of expr | CondExpr of expr
-    | Args of plcVal | Params of plcVal
+    | Args of plcVal | Params of plcVal | TypedVar of plcType | Type of plcType | AtomType of plcType | Types of plcType
 
 %right SEMIC RARROW DCOLON
 
@@ -34,3 +34,48 @@
 %start Prog
 
 %%
+
+Prog : Expr (Expr)
+  |  : Decl SEMIC Prog (Let(NAME, Expr, Prog))
+
+Decl : VAR NAME EQ Expr 
+  |  : FUN NAME Args EQ Expr 
+  |  : FUNREC NAME Args COLON Type EQ Expr (Letrec(NAME, Args, Type, Expr))
+  Letrec of string * plcType * string * plcType * expr * expr
+
+Expr : AtomExpr (AtomExpr)
+  |  : AppExpr (AppExpr)
+  |  : IF Expr THEN Expr ELSE Expr (If(Expr1, Expr2, Expr3))
+
+AtomExpr : Const (Const)
+  |      : NAME (Var(NAME))
+  |      : LCBRAC Prog RCBRAC (Prog)
+  |      : LPAR Expr RPAR (Expr)
+  |      : LPAR Comps RPAR (Comps)
+  |      : ANONFUN Args ANONARR Expr END (Anon(Args, Expr))
+
+Args : LPAR RPAR
+  |  : LPAR Params RPAR (Params)
+
+Params : TypedVar (TypedVar)
+  |    : TypedVar COMMA Params (TypedVar)
+
+TypedVar : Type NAME (Var(NAME))
+
+Type : AtomType (AtomType)
+  |  : LPAR Types RPAR (Types)
+  |  : LSBRAC Types RSBRAC (Types)
+  |  : Type RARROW Type (Type)
+
+Types : Type COMMA Type (Type)
+  |   : Type COMMA Types (Type)
+
+AtomType : NIL
+  |      : BOOL (BoolT)
+  |      : INT (IntT)
+  |      : LPAR Type RPAR (Type)
+
+Const : CONI (ConI(CONI))
+  |   : CONB (ConB(CONB))
+  |   : LPAR RPAR
+  |   : LPAR Type LSBRAC RSBRAC RPAR
