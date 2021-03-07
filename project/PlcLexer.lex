@@ -11,20 +11,20 @@ type lexresult = (slvalue, pos)token
 fun keyword (s, lpos, rpos) =
     case s of
         "var" => VAR(lpos, rpos)
-        | "Bool" => CBOOL(s, lpos, rpos)
+        | "Bool" => BOOL(lpos, rpos)
         | "else" => ELSE(lpos, rpos)
         | "and" => AND(lpos, rpos)
         | "false" => CBOOL(false, lpos, rpos)
-        | "fn" => FUN(lpos, rpos)
+        | "fn" => ANONFUN(lpos, rpos)
         | "fun" => FUN(lpos, rpos)
-        | "hd" => HEAD(lpos, rpos)
+        | "hd" => HD(lpos, rpos)
         | "if" => IF(lpos, rpos)
-        | "Int" => CINT(strToInt(S), lpos, rpos)
+        | "Int" => INT(lpos, rpos)
         | "ise" => ISE(lpos, rpos)
         | "match" => MATCH(lpos, rpos)
         | "Nil" => NIL(lpos, rpos)
         | "print" => PRINT(s, lpos, rpos)
-        | "rec" => REC(lpos, rpos)
+        | "rec" => FUNREC(lpos, rpos)
         | "then" => THEN(lpos, rpos)
         | "tl" => TL(lpos, rpos)
         | "true" => CBOOL(true,lpos, rpos)
@@ -78,5 +78,10 @@ identifier=[a-zA-Z_][a-zA-Z0-9_]*;
 ")" => (RPAR(yypos, yypos));
 "=" => (EQ(yypos, yypos));
 ";" => (SEMIC(yypos, yypos));
+"&&" => (AND(yypos, yypos));
+"=" => (EQ(yypos, yypos));
+"!=" => (NEQ(yypos, yypos));
+"<" => (LT(yypos, yypos));
+"<=" => (LTE(yypos, yypos));
 . => (errror("\n***Lexer error: bad character ***\n"); raise
 Fail("Lexer error: bad character " ^ yytext));
