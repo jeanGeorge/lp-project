@@ -36,46 +36,46 @@
 %%
 
 Prog : Expr (Expr)
-  |  : Decl SEMIC Prog (Let(NAME, Expr, Prog))
+  | Decl SEMIC Prog (Let(NAME, Expr, Prog))
 
-Decl : VAR NAME EQ Expr 
-  |  : FUN NAME Args EQ Expr 
-  |  : FUNREC NAME Args COLON Type EQ Expr (Letrec(NAME, Args, Type, Expr))
-  Letrec of string * plcType * string * plcType * expr * expr
+Decl : VAR NAME EQ Expr
+  | FUN NAME Args EQ Expr
+  | FUNREC NAME Args COLON Type EQ Expr (Letrec(NAME, Args, Type, Expr))
 
 Expr : AtomExpr (AtomExpr)
-  |  : AppExpr (AppExpr)
-  |  : IF Expr THEN Expr ELSE Expr (If(Expr1, Expr2, Expr3))
+  | AppExpr (AppExpr)
+  | IF Expr THEN Expr ELSE Expr (If(Expr1, Expr2, Expr3))
 
 AtomExpr : Const (Const)
-  |      : NAME (Var(NAME))
-  |      : LCBRAC Prog RCBRAC (Prog)
-  |      : LPAR Expr RPAR (Expr)
-  |      : LPAR Comps RPAR (Comps)
-  |      : ANONFUN Args ANONARR Expr END (Anon(Args, Expr))
+  | NAME (Var(NAME))
+  | LCBRAC Prog RCBRAC (Prog)
+  | LPAR Expr RPAR (Expr)
+  | LPAR Comps RPAR (Comps)
+  | ANONFUN Args ANONARR Expr END (Anon(Args, Expr))
 
 Args : LPAR RPAR ()
-  |  : LPAR Params RPAR (Params)
+  | LPAR Params RPAR (Params)
 
 Params : TypedVar (TypedVar)
-  |    : TypedVar COMMA Params (TypedVar)
+  | TypedVar COMMA Params (TypedVar)
 
 TypedVar : Type NAME (Var(NAME))
 
 Type : AtomType (AtomType)
-  |  : LPAR Types RPAR (ListT(Types))
-  |  : LSBRAC Types RSBRAC (SeqT(Types))
-  |  : Type RARROW Type (Type)
+  | LPAR Types RPAR (ListT(Types))
+  | LSBRAC Types RSBRAC (SeqT(Types))
+  | Type RARROW Type (Type)
 
 Types : Type COMMA Type (ListT(Type1, Type2))
-  |   : Type COMMA Types (Type)
+  | Type COMMA Types (Type)
 
 AtomType : NIL
-  |      : BOOL (BoolT)
-  |      : INT (IntT)
-  |      : LPAR Type RPAR (Type)
+  | BOOL (BoolT)
+  | INT (IntT)
+  | LPAR Type RPAR (Type)
 
 Const : CINT (ConI(CINT))
-  |   : CBOOL (ConB(CBOOL))
-  |   : LPAR RPAR
-  |   : LPAR Type LSBRAC RSBRAC RPAR
+  | CBOOL (ConB(CBOOL))
+  | LPAR RPAR
+  | LPAR Type LSBRAC RSBRAC RPAR
+  
