@@ -15,7 +15,7 @@
     | EQ | NEQ | LT | LTE | GT | GTE
     | SEMIC | COMMA | COLON | DCOLON | RARROW | PIPE | UNDERLINE | LPAR | RPAR | LSBRAC | RSBRAC | LCBRAC | RCBRAC
     | NAME of string
-    | CONI of int | CONB of bool
+    | CINT of int | CBOOL of bool
     | NIL | BOOL | INT
 
 %nonterm Prog of expr | Expr of expr | Decl of expr | AtomExpr of expr | AppExpr of expr | Const of expr | Comps of expr | MatchExpr of expr | CondExpr of expr
@@ -54,7 +54,7 @@ AtomExpr : Const (Const)
   |      : LPAR Comps RPAR (Comps)
   |      : ANONFUN Args ANONARR Expr END (Anon(Args, Expr))
 
-Args : LPAR RPAR
+Args : LPAR RPAR ()
   |  : LPAR Params RPAR (Params)
 
 Params : TypedVar (TypedVar)
@@ -63,11 +63,11 @@ Params : TypedVar (TypedVar)
 TypedVar : Type NAME (Var(NAME))
 
 Type : AtomType (AtomType)
-  |  : LPAR Types RPAR (Types)
-  |  : LSBRAC Types RSBRAC (Types)
+  |  : LPAR Types RPAR (ListT(Types))
+  |  : LSBRAC Types RSBRAC (SeqT(Types))
   |  : Type RARROW Type (Type)
 
-Types : Type COMMA Type (Type)
+Types : Type COMMA Type (ListT(Type1, Type2))
   |   : Type COMMA Types (Type)
 
 AtomType : NIL
@@ -75,7 +75,7 @@ AtomType : NIL
   |      : INT (IntT)
   |      : LPAR Type RPAR (Type)
 
-Const : CONI (ConI(CONI))
-  |   : CONB (ConB(CONB))
+Const : CINT (ConI(CINT))
+  |   : CBOOL (ConB(CBOOL))
   |   : LPAR RPAR
   |   : LPAR Type LSBRAC RSBRAC RPAR
