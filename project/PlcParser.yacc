@@ -17,6 +17,7 @@
     | NAME of string
     | CINT of int | CBOOL of bool
     | NIL | BOOL | INT
+    | EOF
 
 %nonterm Prog of expr | Expr of expr | Decl of expr | AtomExpr of expr | AppExpr of expr | Const of expr | Comps of expr | MatchExpr of expr | CondExpr of expr
     | Args of plcVal | Params of plcVal | TypedVar of plcType | Type of plcType | AtomType of plcType | Types of plcType
@@ -36,10 +37,10 @@
 %%
 
 Prog : Expr (Expr)
-  | Decl SEMIC Prog (Let(NAME, Expr, Prog))
+  | Decl (Decl)
 
-Decl : VAR NAME EQ Expr
-  | FUN NAME Args EQ Expr
+Decl : VAR NAME EQ Expr SEMIC Prog (Let(NAME, Expr, Prog))
+  | FUN NAME Args EQ Expr SEMIC Prog (Let(NAME, Expr, Prog))
   | FUNREC NAME Args COLON Type EQ Expr (Letrec(NAME, Args, Type, Expr))
 
 Expr : AtomExpr (AtomExpr)
@@ -52,6 +53,9 @@ AtomExpr : Const (Const)
   | LPAR Expr RPAR (Expr)
   | LPAR Comps RPAR (Comps)
   | ANONFUN Args ANONARR Expr END (Anon(Args, Expr))
+
+Comps : Expr COMMA Expr ()
+  | Expr COMMA Comps ()
 
 Args : LPAR RPAR ()
   | LPAR Params RPAR (Params)
@@ -69,13 +73,13 @@ Type : AtomType (AtomType)
 Types : Type COMMA Type (ListT(Type1, Type2))
   | Type COMMA Types (Type)
 
-AtomType : NIL
+AtomType : NIL ()
   | BOOL (BoolT)
   | INT (IntT)
   | LPAR Type RPAR (Type)
 
 Const : CINT (ConI(CINT))
   | CBOOL (ConB(CBOOL))
-  | LPAR RPAR
-  | LPAR Type LSBRAC RSBRAC RPAR
+  | LPAR RPAR ()
+  | LPAR Type LSBRAC RSBRAC RPAR (Type)
   
