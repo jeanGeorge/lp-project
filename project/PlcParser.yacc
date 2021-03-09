@@ -19,8 +19,21 @@
     | NIL | BOOL | INT
     | EOF
 
-%nonterm Prog of expr | Expr of expr | Decl of expr | AtomExpr of expr | AppExpr of expr | Const of expr | Comps of expr | MatchExpr of expr | CondExpr of expr
-    | Args of plcVal | Params of plcVal | TypedVar of plcType | Type of plcType | AtomType of plcType | Types of plcType
+%nonterm Prog of expr
+    | Expr of expr
+    | Decl of expr
+    | AtomExpr of expr
+    | AppExpr of expr
+    | Const of expr
+    | Comps of expr
+    | MatchExpr of expr
+    | CondExpr of expr
+    | Args of plcVal
+    | Params of plcVal
+    | TypedVar of plcType
+    | Type of plcType
+    | AtomType of plcType
+    | Types of plcType
 
 %right SEMIC RARROW DCOLON
 
@@ -54,8 +67,8 @@ AtomExpr : Const (Const)
   | LPAR Comps RPAR (Comps)
   | ANONFUN Args ANONARR Expr END (Anon(Args, Expr))
 
-Comps : Expr COMMA Expr ()
-  | Expr COMMA Comps ()
+Comps : Expr COMMA Expr (list(Expr1::Expr2::[]))
+  | Expr COMMA Comps (list(Expr::Comps))
 
 Args : LPAR RPAR ()
   | LPAR Params RPAR (Params)
@@ -70,8 +83,8 @@ Type : AtomType (AtomType)
   | LSBRAC Types RSBRAC (SeqT(Types))
   | Type RARROW Type (Type)
 
-Types : Type COMMA Type (ListT(Type1, Type2))
-  | Type COMMA Types (Type)
+Types : Type COMMA Type (list(Type1::Type2::[]))
+  | Type COMMA Types (list(Type::Types))
 
 AtomType : NIL ()
   | BOOL (BoolT)
@@ -82,4 +95,3 @@ Const : CINT (ConI(CINT))
   | CBOOL (ConB(CBOOL))
   | LPAR RPAR ()
   | LPAR Type LSBRAC RSBRAC RPAR (Type)
-  
