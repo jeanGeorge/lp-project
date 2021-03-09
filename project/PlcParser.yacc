@@ -77,6 +77,7 @@ Expr : AtomExpr (AtomExpr)
   | Expr LTE Expr (Prim2("<=", Expr1, Expr2))
   | Expr DCOLON Expr (Prim2("::", Expr1, Expr2))
   | Expr SEMIC Expr (Prim2(";", Expr1, Expr2))
+  | Expr LSBRAC CINT RSBRAC (Item(Expr, CINT))
 
 AtomExpr : Const (Const)
   | NAME (Var(NAME))
@@ -101,7 +102,7 @@ TypedVar : Type NAME (Var(NAME))
 
 Type : AtomType (AtomType)
   | LPAR Types RPAR (ListT(Types))
-  | LSBRAC Types RSBRAC (SeqT(Types))
+  | LSBRAC Type RSBRAC (SeqT(Type))
   | Type RARROW Type (Type)
 
 Types : Type COMMA Type (list(Type1::Type2::[]))
