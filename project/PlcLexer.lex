@@ -88,6 +88,10 @@ identifier=[a-zA-Z_][a-zA-Z0-9_]*;
 ";" => (SEMIC(yypos, yypos));
 "(" => (LPAR(yypos, yypos));
 ")" => (RPAR(yypos, yypos));
+"[" => (LSBRAC(yypos, yypos));
+"]" => (RSBRAC(yypos, yypos));
+"{" => (LCBRAC(yypos, yypos));
+"}" => (RCBRAC(yypos, yypos));
 "=" => (EQ(yypos, yypos));
 . => (errror("\n***Lexer error: bad character ***\n"); raise
 Fail("Lexer error: bad character " ^ yytext));

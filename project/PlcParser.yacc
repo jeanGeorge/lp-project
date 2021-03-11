@@ -26,14 +26,14 @@
     | AppExpr of expr
     | Const of expr
     | Comps of expr list
-    | MatchExpr of expr
-    | CondExpr of expr
-    | Args of plcType * string list
-    | Params of plcType * string list
+    | MatchExpr of (expr option * expr) list
+    | CondExpr of expr option
+    | Args of (plcType * string) list
+    | Params of (plcType * string) list
     | TypedVar of plcType * string
     | Type of plcType
     | AtomType of plcType
-    | Types of plcType
+    | Types of plcType list
 
 %right SEMIC RARROW DCOLON
 
@@ -53,8 +53,8 @@ Prog : Expr (Expr)
   | Decl (Decl)
 
 Decl : VAR NAME EQ Expr SEMIC Prog (Let(NAME, Expr, Prog))
-  | FUN NAME Args EQ Expr SEMIC Prog (Let(NAME, Anon(Args, Expr), Prog))
-  | FUNREC NAME Args COLON Type EQ Expr SEMIC Prog (Letrec(NAME, Args, Type, Expr, Prog))
+  | FUN NAME Args EQ Expr SEMIC Prog (Let(NAME, makeAnon(Args, Expr), Prog))
+  | FUNREC NAME Args COLON Type EQ Expr SEMIC Prog (makeFun(NAME, Args, Type, Expr, Prog))
 
 Expr : AtomExpr (AtomExpr)
   | AppExpr (AppExpr)
@@ -77,49 +77,49 @@ Expr : AtomExpr (AtomExpr)
   | Expr LTE Expr (Prim2("<=", Expr1, Expr2))
   | Expr DCOLON Expr (Prim2("::", Expr1, Expr2))
   | Expr SEMIC Expr (Prim2(";", Expr1, Expr2))
-  | Expr LSBRAC CINT RSBRAC (Item(Expr, CINT))
+  | Expr LSBRAC CINT RSBRAC (Item(CINT, Expr))
 
 AtomExpr : Const (Const)
   | NAME (Var(NAME))
   | LCBRAC Prog RCBRAC (Prog)
   | LPAR Expr RPAR (Expr)
-  | LPAR Comps RPAR (Comps)
-  | ANONFUN Args ANONARR Expr END (Anon(Args, Expr))
+  | LPAR Comps RPAR (List(Comps))
+  | ANONFUN Args ANONARR Expr END (makeAnon(Args, Expr))
 
-Comps : Expr COMMA Expr (list(Expr1::Expr2::[]))
-  | Expr COMMA Comps (list(Expr::Comps))
+Comps : Expr COMMA Expr (Expr1::Expr2::[])
+  | Expr COMMA Comps (Expr::Comps)
 
 MatchExpr : END ([])
-  | PIPE CondExpr RARROW Expr MatchExpr (list((CondExpr, Expr)::MatchExpr))
+  | PIPE CondExpr RARROW Expr MatchExpr ((CondExpr, Expr)::MatchExpr)
 
 CondExpr : Expr (SOME Expr)
   | UNDERSCORE (NONE)
 
-AppExpr : AtomExpr AtomExpr (list(AtomExpr1::AtomExpr2::[]))
-  | AppExpr AtomExpr (list(AtomExpr::AppExpr))
+AppExpr : AtomExpr AtomExpr (Call(AtomExpr1, AtomExpr2))
+  | AppExpr AtomExpr (Call(AtomExpr, AppExpr))
 
-Args : LPAR RPAR ([]])
+Args : LPAR RPAR ([])
   | LPAR Params RPAR (Params)
 
-Params : TypedVar (list(TypedVar::[]))
-  | TypedVar COMMA Params (list(TypedVar::Params))
+Params : TypedVar (TypedVar::[])
+  | TypedVar COMMA Params (TypedVar::Params)
 
 TypedVar : Type NAME (Type, NAME)
 
 Type : AtomType (AtomType)
   | LPAR Types RPAR (ListT(Types))
   | LSBRAC Type RSBRAC (SeqT(Type))
-  | Type RARROW Type (Type)
+  | Type RARROW Type (FunT(Type1, Type2))
 
-Types : Type COMMA Type (list(Type1::Type2::[]))
-  | Type COMMA Types (list(Type::Types))
+Types : Type COMMA Type (Type1::Type2::[])
+  | Type COMMA Types (Type::Types)
 
-AtomType : NIL (ListT())
+AtomType : NIL (ListT([]))
   | BOOL (BoolT)
   | INT (IntT)
   | LPAR Type RPAR (Type)
 
 Const : CINT (ConI(CINT))
   | CBOOL (ConB(CBOOL))
-  | LPAR RPAR ()
-  | LPAR Type LSBRAC RSBRAC RPAR (Type)
+  | LPAR RPAR (List([]))
+  | LPAR Type LSBRAC RSBRAC RPAR (ESeq(Type))
