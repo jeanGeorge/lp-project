@@ -85,6 +85,7 @@ identifier=[a-zA-Z_][a-zA-Z0-9_]*;
 "!=" => (NEQ(yypos, yypos));
 "<" => (LT(yypos, yypos));
 "<=" => (LTE(yypos, yypos));
+":" => (COLON(yypos, yypos));
 "::" => (DCOLON(yypos, yypos));
 ";" => (SEMIC(yypos, yypos));
 "," => (COMMA(yypos, yypos));

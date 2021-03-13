@@ -18,6 +18,7 @@
     | CINT of int | CBOOL of bool
     | NIL | BOOL | INT
     | EOF
+    | TRUE | FALSE
 
 %nonterm Prog of expr
     | Expr of expr
@@ -35,11 +36,18 @@
     | AtomType of plcType
     | Types of plcType list
 
-%right SEMIC RARROW DCOLON
-
-%left ELSE AND EQ NEQ LT LTE PLUS MINUS MULTI DIV LSBRAC
-
-%nonassoc IF NOT HD TL ISE PRINT FUN
+%right SEMIC RARROW
+%nonassoc IF
+%nonassoc ELSE
+%left AND
+%left EQ NEQ
+%left LT LTE
+%right DCOLON
+%left PLUS MINUS
+%left MULTI DIV
+%nonassoc NOT HD TL ISE PRINT NAME
+%left LSBRAC
+%nonassoc VAR FUN FUNREC THEN MATCH WITH COMMA COLON RSBRAC LPAR RPAR LCBRAC RCBRAC ANONFUN ANONARR END PIPE TRUE FALSE
 
 %eop EOF
 
