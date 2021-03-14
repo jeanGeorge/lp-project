@@ -36,8 +36,8 @@
     | Type of plcType
     | AtomType of plcType
     | Types of plcType list
-    | Nat of int
     | Name of string
+    | Nat of int
 
 %right SEMIC RARROW
 %nonassoc IF
@@ -62,9 +62,9 @@
 Prog : Expr (Expr)
   | Decl (Decl)
 
-Decl : VAR NAME EQ Expr SEMIC Prog (Let(NAME, Expr, Prog))
-  | FUN NAME Args EQ Expr SEMIC Prog (Let(NAME, makeAnon(Args, Expr), Prog))
-  | FUN REC NAME Args COLON Type EQ Expr SEMIC Prog (makeFun(NAME, Args, Type, Expr, Prog))
+Decl : VAR Name EQ Expr SEMIC Prog (Let(Name, Expr, Prog))
+  | FUN Name Args EQ Expr SEMIC Prog (Let(Name, makeAnon(Args, Expr), Prog))
+  | FUN REC Name Args COLON Type EQ Expr SEMIC Prog (makeFun(Name, Args, Type, Expr, Prog))
 
 Expr : AtomExpr (AtomExpr)
   | AppExpr (AppExpr)
@@ -90,14 +90,14 @@ Expr : AtomExpr (AtomExpr)
   | Expr LSBRAC Nat RSBRAC (Item(Nat, Expr))
 
 AtomExpr : Const (Const)
-  | NAME (Var(NAME))
+  | Name (Var(Name))
   | LCBRAC Prog RCBRAC (Prog)
   | LPAR Expr RPAR (Expr)
   | LPAR Comps RPAR (List(Comps))
   | ANONFUN Args ANONARR Expr END (makeAnon(Args, Expr))
 
 AppExpr : AtomExpr AtomExpr (Call(AtomExpr1, AtomExpr2))
-  | AppExpr AtomExpr (Call(AtomExpr, AppExpr))
+  | AppExpr AtomExpr (Call(AppExpr, AtomExpr))
 
 Const : TRUE (ConB(TRUE))
   | FALSE (ConB(FALSE))
@@ -120,7 +120,7 @@ Args : LPAR RPAR ([])
 Params : TypedVar (TypedVar::[])
   | TypedVar COMMA Params (TypedVar::Params)
 
-TypedVar : Type NAME (Type, NAME)
+TypedVar : Type Name (Type, Name)
 
 Type : AtomType (AtomType)
   | LPAR Types RPAR (ListT(Types))
@@ -134,5 +134,7 @@ AtomType : NIL (ListT([]))
 
 Types : Type COMMA Type (Type1::Type2::[])
   | Type COMMA Types (Type::Types)
+
+Name: NAME(NAME)
 
 Nat: CINT(CINT)

@@ -202,35 +202,35 @@ in Vector.fromList(List.map g
 {fin = [], trans = 1},
 {fin = [], trans = 1},
 {fin = [(N 66)], trans = 0},
-{fin = [(N 22),(N 66)], trans = 0},
+{fin = [(N 54),(N 66)], trans = 0},
+{fin = [(N 62),(N 66)], trans = 0},
+{fin = [(N 52),(N 66)], trans = 0},
+{fin = [(N 7),(N 66)], trans = 7},
+{fin = [(N 7)], trans = 7},
+{fin = [(N 7),(N 64),(N 66)], trans = 7},
+{fin = [(N 50),(N 66)], trans = 0},
 {fin = [(N 48),(N 66)], trans = 0},
-{fin = [(N 20),(N 66)], trans = 0},
-{fin = [(N 10),(N 66)], trans = 7},
-{fin = [(N 10)], trans = 7},
-{fin = [(N 10),(N 46),(N 66)], trans = 7},
-{fin = [(N 26),(N 66)], trans = 0},
-{fin = [(N 24),(N 66)], trans = 0},
-{fin = [(N 32),(N 66)], trans = 12},
-{fin = [(N 54)], trans = 0},
-{fin = [(N 56),(N 66)], trans = 14},
-{fin = [(N 59)], trans = 0},
-{fin = [(N 44),(N 66)], trans = 0},
-{fin = [(N 61),(N 66)], trans = 17},
-{fin = [(N 64)], trans = 0},
-{fin = [(N 7),(N 66)], trans = 19},
-{fin = [(N 7)], trans = 19},
-{fin = [(N 18),(N 66)], trans = 0},
-{fin = [(N 14),(N 66)], trans = 22},
-{fin = [(N 51)], trans = 0},
-{fin = [(N 42),(N 66)], trans = 0},
-{fin = [(N 12),(N 66)], trans = 0},
-{fin = [(N 16),(N 66)], trans = 0},
-{fin = [(N 30),(N 66)], trans = 0},
-{fin = [(N 28),(N 66)], trans = 0},
-{fin = [(N 66)], trans = 29},
+{fin = [(N 25),(N 66)], trans = 12},
+{fin = [(N 60)], trans = 0},
+{fin = [(N 30),(N 66)], trans = 14},
+{fin = [(N 33)], trans = 0},
+{fin = [(N 40),(N 66)], trans = 0},
+{fin = [(N 35),(N 66)], trans = 17},
 {fin = [(N 38)], trans = 0},
-{fin = [(N 40),(N 66)], trans = 31},
-{fin = [(N 35)], trans = 0},
+{fin = [(N 10),(N 66)], trans = 19},
+{fin = [(N 10)], trans = 19},
+{fin = [(N 23),(N 66)], trans = 0},
+{fin = [(N 19),(N 66)], trans = 22},
+{fin = [(N 57)], trans = 0},
+{fin = [(N 42),(N 66)], trans = 0},
+{fin = [(N 17),(N 66)], trans = 0},
+{fin = [(N 21),(N 66)], trans = 0},
+{fin = [(N 46),(N 66)], trans = 0},
+{fin = [(N 44),(N 66)], trans = 0},
+{fin = [(N 66)], trans = 29},
+{fin = [(N 15)], trans = 0},
+{fin = [(N 12),(N 66)], trans = 31},
+{fin = [(N 28)], trans = 0},
 {fin = [(N 4),(N 66)], trans = 33},
 {fin = [(N 4)], trans = 33},
 {fin = [(N 1)], trans = 0}])
@@ -276,34 +276,34 @@ let fun continue() = lex() in
 			(* Application actions *)
 
   1 => (lineNumber := !lineNumber + 1; lex())
-| 10 => let val yytext=yymktext() in keyword(yytext, yypos, yypos) end
-| 12 => (PLUS(yypos, yypos))
-| 14 => (MINUS(yypos, yypos))
-| 16 => (MULTI(yypos, yypos))
-| 18 => (DIV(yypos, yypos))
-| 20 => (LCBRAC(yypos, yypos))
-| 22 => (RCBRAC(yypos, yypos))
-| 24 => (LSBRAC(yypos, yypos))
-| 26 => (RSBRAC(yypos, yypos))
-| 28 => (LPAR(yypos, yypos))
-| 30 => (RPAR(yypos, yypos))
-| 32 => (EQ(yypos, yypos))
-| 35 => (NEQ(yypos, yypos))
-| 38 => (AND(yypos, yypos))
+| 10 => let val yytext=yymktext() in CINT(strToInt(yytext), yypos, yypos) end
+| 12 => (NOT(yypos, yypos))
+| 15 => (AND(yypos, yypos))
+| 17 => (PLUS(yypos, yypos))
+| 19 => (MINUS(yypos, yypos))
+| 21 => (MULTI(yypos, yypos))
+| 23 => (DIV(yypos, yypos))
+| 25 => (EQ(yypos, yypos))
+| 28 => (NEQ(yypos, yypos))
+| 30 => (LT(yypos, yypos))
+| 33 => (LTE(yypos, yypos))
+| 35 => (COLON(yypos, yypos))
+| 38 => (DCOLON(yypos, yypos))
 | 4 => (lex())
-| 40 => (NOT(yypos, yypos))
+| 40 => (SEMIC(yypos, yypos))
 | 42 => (COMMA(yypos, yypos))
-| 44 => (SEMIC(yypos, yypos))
-| 46 => (UNDERSCORE(yypos, yypos))
-| 48 => (PIPE(yypos, yypos))
-| 51 => (RARROW(yypos, yypos))
-| 54 => (ANONARR(yypos, yypos))
-| 56 => (LT(yypos, yypos))
-| 59 => (LTE(yypos, yypos))
-| 61 => (COLON(yypos, yypos))
-| 64 => (DCOLON(yypos, yypos))
+| 44 => (LPAR(yypos, yypos))
+| 46 => (RPAR(yypos, yypos))
+| 48 => (LSBRAC(yypos, yypos))
+| 50 => (RSBRAC(yypos, yypos))
+| 52 => (LCBRAC(yypos, yypos))
+| 54 => (RCBRAC(yypos, yypos))
+| 57 => (RARROW(yypos, yypos))
+| 60 => (ANONARR(yypos, yypos))
+| 62 => (PIPE(yypos, yypos))
+| 64 => (UNDERSCORE(yypos, yypos))
 | 66 => let val yytext=yymktext() in error("\n***Lexer error: bad character ***\n"); raise Fail("Lexer error: bad character " ^ yytext) end
-| 7 => let val yytext=yymktext() in CINT(strToInt(yytext), yypos, yypos) end
+| 7 => let val yytext=yymktext() in keyword(yytext, yypos, yypos) end
 | _ => raise Internal.LexerError
 
 		) end )
