@@ -27,7 +27,7 @@ exception OpNonList
 10-exception CallTypeMisM- Você está passando pra uma chamada de função um tipo diferente do qual ela suporta
 11-exception NotFunc- Você está tentando chamar algo que não é uma função.
 12-exception ListOutOfRange- Tentativa de acessar um elemento fora dos limites da lista
-13-exception OpNonList- Tentativa de acessar um elemento em uma expressão que não é uma lista. 
+13-exception OpNonList- Tentativa de acessar um elemento em uma expressão que não é uma lista.
 *)
 
 
