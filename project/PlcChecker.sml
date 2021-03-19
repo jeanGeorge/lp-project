@@ -14,14 +14,34 @@ exception NotFunc
 exception ListOutOfRange
 exception OpNonList
 
+(*
+1-exception EmptySeq A sequência de entrada não contém nenhum elemento
+2-exception UnknownType- É usada nas situações onde nenhuma das específicas se encaixa.
+3-exception NotEqTypes- Se os tipos usados numa comparação são diferentes.
+4-exception WrongRetType- O tipo de retorno da função não condiz com o corpo da mesma.
+5-exception DiffBrTypes- Os tipos da expressões dos possíveis caminhos de um If divergem
+6-exception IfCondNotBool- A condição do if não é booleana
+7-exception NoMatchResults- Não há resultados para a expressão match
+8-exception MatchResTypeDiff- O tipo de algum dos casos em match difere dos demais
+9-exception MatchCondTypesDiff- O tipo das opções de match difere do tipo da expressão passada para Match
+10-exception CallTypeMisM- Você está passando pra uma chamada de função um tipo diferente do qual ela suporta
+11-exception NotFunc- Você está tentando chamar algo que não é uma função.
+12-exception ListOutOfRange- Tentativa de acessar um elemento fora dos limites da lista
+13-exception OpNonList- Tentativa de acessar um elemento em uma expressão que não é uma lista. 
+*)
+
+
 fun teval (e:expr, p:env) =
-    case e of
-        (Var x) p = lookup p x (* 1 *)
+    case (e,p) of
+        (Var x) p => lookup (p,x) (* 1 *)
         | (ConI _) _ => IntT (* 2 *)
         | (ConB _) _ => BoolT (* 3 e 4 *)
         | (List []) _ => ListT [] (* 5 *)
         | (List l) p => ListT map (fn x => teval(x, p)) l (* 6 *)
-        | ESeq (SeqT t) => SeqT t (* 7 *)
+        | (ESeq s) _ => (* 7 *)
+            case s of SeqT t =>
+                SeqT t
+            | _ => raise EmptySeq
         | Let(x, e1, e2) p => teval(e2, (x, teval(e1, p))::p) (* 8 *)
         | Letrec(f, argType, arg, fType, e1, e2) p => (* 9 *)
             let
@@ -36,18 +56,13 @@ fun teval (e:expr, p:env) =
             end
         | Anon(type, x, exp) p => FunT(type, teval(exp, (x, type)::p)) (* 10 *)
         | Call(e2, e1) p => (* 11 *)
-            let
-                val e1Type = teval(exp1 env)
-                val e2Type = teval(exp2, env)
-            in
-                case e2Type of
-                    FunT (argType, resultType) => 
-                        if e1Type = argType then
-                            resultType
-                        else
-                            raise CallTypeMisM
-                    | _ => raise NotFunc
-            end
+            case teval(exp2, p) of
+                FunT(argType, resultType) =>
+                    if teval(exp1, p) = argType then
+                        resultType
+                    else
+                        raise CallTypeMisM
+                | _ => raise NotFunc
         | If(e1, e2, e3) p => (* 12 *)
             case teval (e1, p) of
                 BoolT =>
@@ -60,30 +75,32 @@ fun teval (e:expr, p:env) =
             let
                 val expType = teval(exp, p)
                 val firstCaseRespType = teval (#2 (hd cases)) p
-                fun checkCases (Match(exp, cases)) (p:env) =
+                fun checkCases (Match(exp, cases)) (p) =
                     case cases of
-                        h::[] => let in
-                            case h of
-                                (SOME e1, e2) => 
-                                    if teval(e2, p) = firstCaseRespType then
-                                        if initialCond = teval(e1, p) then 
-                                            teval(e2, p)
+                        h::[] =>
+                            let in
+                                case h of
+                                    (SOME e1, e2) =>
+                                        if teval(e2, p) = firstCaseRespType then
+                                            if initialCond = teval(e1, p) then
+                                                teval(e2, p)
+                                            else
+                                                raise MatchCondTypesDiff
                                         else
-                                            raise MatchCondTypesDiff
-                                    else
-                                        raise MatchResTypeDiff
-                                | (NONE, e2) =>
-                                    if teval(e2, p) = firstCaseRespType then
-                                        firstCaseRespType
-                                    else
-                                        raise MatchResTypeDiff
-                        end
-                    | h::tail => let in
+                                            raise MatchResTypeDiff
+                                    | (NONE, e2) =>
+                                        if teval(e2, p) = firstCaseRespType then
+                                            firstCaseRespType
+                                        else
+                                            raise MatchResTypeDiff
+                            end
+                    | h::tail => 
+                        let in
                             case h of
-                                (SOME e1, e2) => 
+                                (SOME e1, e2) =>
                                     if teval(e2, p) = firstCaseRespType then
                                         if initialCond = teval(e1, p) then
-                                            checkCases (Match(exp1, tail)) p 
+                                            checkCases (Match(exp1, tail)) p
                                         else
                                             raise MatchCondTypesDiff
                                     else
@@ -96,32 +113,32 @@ fun teval (e:expr, p:env) =
             end
         | Prim1(oper, e1) p => (* 14, 15, 16, 17, 18, 19 *)
             case oper of
-                "!" =>
+                "!" => (* 14 *)
                     if teval(e1, p) = BoolT then
                         BoolT
                     else
                         raise UnknownType
-                | "-" =>
+                | "-" => (* 15 *)
                     if teval(e1, p) = IntT then
                         IntT
                     else
                         raise UnknownType
-                | "hd" =>
-                    if teval(e1, p) = (SeqT t) then
-                        (SeqT t)
-                    else
-                        raise UnknownType
-                | "tl" =>
-                    if teval(e1, p) = (SeqT t) then
-                        (SeqT t)
-                    else
-                        raise UnknownType
-                | "ise" =>
-                    if teval(e1, p) = (SeqT t) then
-                        BoolT
-                    else
-                        raise UnknownType
-                | "print" => List[]
+                | "hd" => (* 16 *)
+                    case teval(e1, p) of
+                        (SeqT t) =>
+                            (SeqT t)
+                        | _ => raise UnknownType
+                | "tl" => (* 17 *)
+                    case teval(e1, p) of 
+                        (SeqT t) =>
+                            (SeqT t)
+                        | _ => raise UnknownType
+                | "ise" => (* 18 *)
+                    case teval(e1, p) of 
+                        (SeqT t) =>
+                            BoolT
+                        | _ => raise UnknownType
+                | "print" => List[] (* 19 *)
                 | _  => raise UnknownType
         | Prim2(oper, e1, e2) p => (* 20, 21, 22, 23, 24 *)
             case oper of
@@ -146,9 +163,9 @@ fun teval (e:expr, p:env) =
                             else
                                 raise NotEqTypes
                         | (ListT t, ListT []) => SeqT(ListT t)
-                        | (ListT t, SeqT t) => 
-                            if t = (ListT t) then
-                                SeqT t
+                        | (ListT t, SeqT s) =>
+                            if s = (ListT t) then
+                                SeqT s
                             else
                                 raise NotEqTypes
                         | _ => raise UnknownType
@@ -186,30 +203,21 @@ fun teval (e:expr, p:env) =
                     else NotEqTypes
                 | ";" => teval(e2, p) (* 26 *)
                 | _ => raise UnknownType
-        | Item(i, exp) _ => (* 25 *)
+        | Item(i, exp) p => (* 25 *)
             let
                 fun getIndexElement(i, []) = raise ListOutOfRange
-                    | getIndexElement(i, (h::[])) = if i = 1 then h else raise ListOutOfRange
-                    | getIndexElement(i, (h::tail)) = if i = 1 then h else getIndexElement(i - 1, tail)
+                    | getIndexElement(i, (h::[])) = 
+                        if i = 1 then 
+                            h
+                        else
+                            raise ListOutOfRange
+                    | getIndexElement(i, (h::tail)) = 
+                        if i = 1 then 
+                            h else 
+                        getIndexElement(i - 1, tail)
             in
-                case teval exp env of
+                case teval (exp,p) of
                     ListT l => getIndexElement(i, l)
                     | _ => raise OpNonList
             end
         | _ => raise UnknownType
-
-(*
-1-exception EmptySeq A sequência de entrada não contém nenhum elemento
-2-exception UnknownType- É usada nas situações onde nenhuma das específicas se encaixa.
-3-exception NotEqTypes- Se os tipos usados numa comparação são diferentes.
-4-exception WrongRetType- O tipo de retorno da função não condiz com o corpo da mesma.
-5-exception DiffBrTypes- Os tipos da expressões dos possíveis caminhos de um If divergem
-6-exception IfCondNotBool- A condição do if não é booleana
-7-exception NoMatchResults- Não há resultados para a expressão match
-8-exception MatchResTypeDiff- O tipo de algum dos casos em match difere dos demais
-9-exception MatchCondTypesDiff- O tipo das opções de match difere do tipo da expressão passada para Match
-10-exception CallTypeMisM- Você está passando pra uma chamada de função um tipo diferente do qual ela suporta
-11-exception NotFunc- Você está tentando chamar algo que não é uma função.
-12-exception ListOutOfRange- Tentativa de acessar um elemento fora dos limites da lista
-13-exception OpNonList- Tentativa de acessar um elemento em uma expressão que não é uma lista. 
-*)

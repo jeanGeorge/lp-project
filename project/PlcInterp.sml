@@ -8,11 +8,11 @@ exception NotAFunc
 
 fun eval (e:expr, p:env) =
     case e of
-        (Var v) p => lookup(p, v) (* 1 *)
-        | (ConI i) _ => IntV i (* 2 *)
-        | (ConB b) _ => BoolV b (* 3 e 4 *)
+        (Var x) p => lookup(p, x) (* 1 *)
+        | (ConI x) _ => IntV x (* 2 *)
+        | (ConB x) _ => BoolV x (* 3 e 4 *)
         | List [] _ => ListV [] (* 5 ? *)
-        | (List e) p => ListV map (fn x => eval(x, p)) e (* 6 ? *)
+        | (List l) p => ListV map (fn x => eval(x, p)) l (* 6 ? *)
         | (ESeq e) _ => SeqV [] (* 7 *)
         | Let(x, e1, e2) p => eval(e2, (x, eval(e1, p))::p) (* 8 ? *)
         | Letrec (f, argType, x, fType, e1, e2) p => eval(e2, (f, Clos(f, x, e1, p))) (* 9 ? *)
