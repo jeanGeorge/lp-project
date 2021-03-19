@@ -16,17 +16,17 @@ exception OpNonList
 
 fun teval (e:expr, p:env) =
     case e of
-        (* Var _ => teval  *) (* 1 *)
-        (ConI _) _ => IntT (* 2 *)
+        (Var x) p = lookup p x (* 1 *)
+        | (ConI _) _ => IntT (* 2 *)
         | (ConB _) _ => BoolT (* 3 e 4 *)
-        | [] _ => ListT [] (* 5 ? *)
-        | (List e) p => map (fn x => teval(x, p)) e (* 6 ? *)
+        | (List []) _ => ListT [] (* 5 *)
+        | (List l) p => ListT map (fn x => teval(x, p)) l (* 6 *)
         | ESeq (SeqT t) => SeqT t (* 7 *)
-        | Let(x, e1, e2) p => teval(e2, (x, teval(e1, p))::p) (* 8 ? *)
-        | Letrec (f, argType, x, fType, e1, e2) p => (* 9 ? *)
+        | Let(x, e1, e2) p => teval(e2, (x, teval(e1, p))::p) (* 8 *)
+        | Letrec(f, argType, arg, fType, e1, e2) p => (* 9 *)
             let
                 val pRec = (f, FunT(argType, fType))
-                val e1Type = teval(e1, pRec::(x, argType)::p)
+                val e1Type = teval(e1, pRec::(arg, argType)::p)
                 val e2Type = teval(e2, (pRec::p))
             in
                 if e1Type = fType then
@@ -35,8 +35,20 @@ fun teval (e:expr, p:env) =
                     raise WrongRetType
             end
         | Anon(type, x, exp) p => FunT(type, teval(exp, (x, type)::p)) (* 10 *)
-        (* 11 *)
-        | If(e1, e2, e3) p =>  (* 12 *)
+        | Call(e2, e1) p => (* 11 *)
+            let
+                val e1Type = teval(exp1 env)
+                val e2Type = teval(exp2, env)
+            in
+                case e2Type of
+                    FunT (argType, resultType) => 
+                        if e1Type = argType then
+                            resultType
+                        else
+                            raise CallTypeMisM
+                    | _ => raise NotFunc
+            end
+        | If(e1, e2, e3) p => (* 12 *)
             case teval (e1, p) of
                 BoolT =>
                     if teval(e1, p) = teval(e3, p) then
@@ -44,7 +56,44 @@ fun teval (e:expr, p:env) =
                     else
                         raise DiffBrTypes
                 | _ => raise IfCondNotBool
-        (* | Match(e1, l) p =>  (* 13 *) *)
+        | Match(exp, cases) p =>  (* 13 *)
+            let
+                val expType = teval(exp, p)
+                val firstCaseRespType = teval (#2 (hd cases)) p
+                fun checkCases (Match(exp, cases)) (p:env) =
+                    case cases of
+                        h::[] => let in
+                            case h of
+                                (SOME e1, e2) => 
+                                    if teval(e2, p) = firstCaseRespType then
+                                        if initialCond = teval(e1, p) then 
+                                            teval(e2, p)
+                                        else
+                                            raise MatchCondTypesDiff
+                                    else
+                                        raise MatchResTypeDiff
+                                | (NONE, e2) =>
+                                    if teval(e2, p) = firstCaseRespType then
+                                        firstCaseRespType
+                                    else
+                                        raise MatchResTypeDiff
+                        end
+                    | h::tail => let in
+                            case h of
+                                (SOME e1, e2) => 
+                                    if teval(e2, p) = firstCaseRespType then
+                                        if initialCond = teval(e1, p) then
+                                            checkCases (Match(exp1, tail)) p 
+                                        else
+                                            raise MatchCondTypesDiff
+                                    else
+                                        raise MatchResTypeDiff
+                            | _ => raise UnknownType
+                        end
+                    | _ => raise NoMatchResults
+            in
+                checkCases Match(exp, cases) p
+            end
         | Prim1(oper, e1) p => (* 14, 15, 16, 17, 18, 19 *)
             case oper of
                 "!" =>
@@ -74,7 +123,7 @@ fun teval (e:expr, p:env) =
                         raise UnknownType
                 | "print" => List[]
                 | _  => raise UnknownType
-        | Prim2(oper, e1, e2) => (* 20, 21, 22, 23, 24 *)
+        | Prim2(oper, e1, e2) p => (* 20, 21, 22, 23, 24 *)
             case oper of
                 "&&" => (* 20 *)
                     if teval(e1, p) = BoolT andalso teval(e2, p) = BoolT then
@@ -136,8 +185,17 @@ fun teval (e:expr, p:env) =
                         BoolT
                     else NotEqTypes
                 | ";" => teval(e2, p) (* 26 *)
-                (* 25 *)
                 | _ => raise UnknownType
+        | Item(i, exp) _ => (* 25 *)
+            let
+                fun getIndexElement(i, []) = raise ListOutOfRange
+                    | getIndexElement(i, (h::[])) = if i = 1 then h else raise ListOutOfRange
+                    | getIndexElement(i, (h::tail)) = if i = 1 then h else getIndexElement(i - 1, tail)
+            in
+                case teval exp env of
+                    ListT l => getIndexElement(i, l)
+                    | _ => raise OpNonList
+            end
         | _ => raise UnknownType
 
 (*
