@@ -54,7 +54,7 @@ fun teval (e:expr, p:env) =
                 else
                     raise WrongRetType
             end
-        | Anon(type, x, exp) p => FunT(type, teval(exp, (x, type)::p)) (* 10 *)
+     (*   | Anon(type, x, exp) p => FunT(type, teval(exp, ((x, type)::p)))  10 *)
         | Call(e2, e1) p => (* 11 *)
             case teval(exp2, p) of
                 FunT(argType, resultType) =>
@@ -112,97 +112,104 @@ fun teval (e:expr, p:env) =
                 checkCases Match(exp, cases) p
             end
         | Prim1(oper, e1) p => (* 14, 15, 16, 17, 18, 19 *)
-            case oper of
-                "!" => (* 14 *)
-                    if teval(e1, p) = BoolT then
-                        BoolT
-                    else
-                        raise UnknownType
-                | "-" => (* 15 *)
-                    if teval(e1, p) = IntT then
-                        IntT
-                    else
-                        raise UnknownType
-                | "hd" => (* 16 *)
-                    case teval(e1, p) of
-                        (SeqT t) =>
-                            (SeqT t)
-                        | _ => raise UnknownType
-                | "tl" => (* 17 *)
-                    case teval(e1, p) of 
-                        (SeqT t) =>
-                            (SeqT t)
-                        | _ => raise UnknownType
-                | "ise" => (* 18 *)
-                    case teval(e1, p) of 
-                        (SeqT t) =>
+            let in
+                case oper of
+                    "!" => (* 14 *)
+                        if teval(e1, p) = BoolT then
                             BoolT
-                        | _ => raise UnknownType
-                | "print" => List[] (* 19 *)
-                | _  => raise UnknownType
+                        else raise UnknownType
+                    | "-" => (* 15 *)
+                        if teval(e1, p) = IntT then
+                            IntT
+                        else raise UnknownType
+                    | "hd" => (* 16 *)
+                        let in
+                            case teval(e1, p) of
+                                (SeqT t) => t
+                                | _ => raise UnknownType
+                        end
+                    | "tl" => (* 17 *)
+                        let in
+                            case teval(e1, p) of
+                                (SeqT t) => (SeqT t)
+                                | _ => raise UnknownType
+                        end
+                    | "ise" => (* 18 *)
+                        let in
+                            case teval(e1, p) of
+                                (SeqT t) => BoolT
+                                | _ => raise UnknownType
+                        end
+                    | "print" => ListT[] (* 19 *)
+                    | _  => raise UnknownType
+            end
         | Prim2(oper, e1, e2) p => (* 20, 21, 22, 23, 24 *)
-            case oper of
-                "&&" => (* 20 *)
-                    if teval(e1, p) = BoolT andalso teval(e2, p) = BoolT then
-                        BoolT
-                    else UnknownType
-                | "::" => (* 21 *)
-                    case (teval(e1, p), teval(e2, p)) of
-                        (IntT, ListT []) =>
-                            SeqT IntT
-                        | (IntT, SeqT t) =>
-                            if t = IntT then
-                                SeqT t
-                            else
-                                raise NotEqTypes
-                        | (BoolT, ListT []) =>
-                            SeqT BoolT
-                        | (BoolT, SeqT t) =>
-                            if t = BoolT then
-                                SeqT BoolT
-                            else
-                                raise NotEqTypes
-                        | (ListT t, ListT []) => SeqT(ListT t)
-                        | (ListT t, SeqT s) =>
-                            if s = (ListT t) then
-                                SeqT s
-                            else
-                                raise NotEqTypes
-                        | _ => raise UnknownType
-                | "+" => (* inicio 22 *)
-                    if teval(e1, p) = IntT andalso teval(e2, p) = IntT then
-                        IntT
-                    else UnknownType
-                | "-" =>
-                    if teval(e1, p) = IntT andalso teval(e2, p) = IntT then
-                        IntT
-                    else UnknownType
-                | "*" =>
-                    if teval(e1, p) = IntT andalso teval(e2, p) = IntT then
-                        IntT
-                    else UnknownType
-                | "/" => (* fim 22 *)
-                    if teval(e1, p) = IntT andalso teval(e2, p) = IntT then
-                        IntT
-                    else UnknownType
-                | "<" => (* 23 *)
-                    if teval(e1, p) = IntT andalso teval(e2, p) = IntT then
-                        IntT
-                    else UnknownType
-                | "<=" => (* 23 *)
-                    if teval(e1, p) = IntT andalso teval(e2, p) = IntT then
-                        IntT
-                    else UnknownType
-                | "=" => (* 24 *)
-                     if teval(e1, p) = teval(e2, p) andalso (teval(e1, p) = IntT orelse teval(e1,p) = BoolT orelse teval(e1,p) = ListT orelse teval(e1,p) = SeqT) then
-                        BoolT
-                    else NotEqTypes
-                | "!=" => (* 24 *)
-                    if teval(e1, p) = teval(e2, p) andalso (teval(e1, p) = IntT orelse teval(e1,p) = BoolT orelse teval(e1,p) = ListT orelse teval(e1,p) = SeqT) then
-                        BoolT
-                    else NotEqTypes
-                | ";" => teval(e2, p) (* 26 *)
-                | _ => raise UnknownType
+            let in
+                case oper of
+                    "&&" => (* 20 *)
+                        if teval(e1, p) = BoolT andalso teval(e2, p) = BoolT then
+                            BoolT
+                        else raise UnknownType
+                    | "::" => (* 21 *)
+                        let in
+                            case (teval(e1, p), teval(e2, p)) of
+                                (IntT, ListT []) =>
+                                    SeqT IntT
+                                | (IntT, SeqT t) =>
+                                    if t = IntT then
+                                        SeqT t
+                                    else
+                                        raise NotEqTypes
+                                | (BoolT, ListT []) =>
+                                    SeqT BoolT
+                                | (BoolT, SeqT t) =>
+                                    if t = BoolT then
+                                        SeqT BoolT
+                                    else
+                                        raise NotEqTypes
+                                | (ListT t, ListT []) => SeqT(ListT t)
+                                | (ListT t, SeqT s) =>
+                                    if s = (ListT t) then
+                                        SeqT s
+                                    else
+                                        raise NotEqTypes
+                                | _ => raise UnknownType
+                            end
+                    | "+" => (* inicio 22 *)
+                        if teval(e1, p) = IntT andalso teval(e2, p) = IntT then
+                            IntT
+                        else raise UnknownType
+                    | "-" =>
+                        if teval(e1, p) = IntT andalso teval(e2, p) = IntT then
+                            IntT
+                        else raise UnknownType
+                    | "*" =>
+                        if teval(e1, p) = IntT andalso teval(e2, p) = IntT then
+                            IntT
+                        else raise UnknownType
+                    | "/" => (* fim 22 *)
+                        if teval(e1, p) = IntT andalso teval(e2, p) = IntT then
+                            IntT
+                        else raise UnknownType
+                    | "<" => (* 23 *)
+                        if teval(e1, p) = IntT andalso teval(e2, p) = IntT then
+                            IntT
+                        else raise UnknownType
+                    | "<=" => (* 23 *)
+                        if teval(e1, p) = IntT andalso teval(e2, p) = IntT then
+                            IntT
+                        else raise UnknownType
+                    | "=" => (* 24 *)
+                        if teval(e1, p) = teval(e2, p) andalso (teval(e1, p) = IntT orelse teval(e1,p) = BoolT orelse teval(e1,p) = ListT orelse teval(e1,p) = SeqT) then
+                            BoolT
+                        else raise NotEqTypes
+                    | "!=" => (* 24 *)
+                        if teval(e1, p) = teval(e2, p) andalso (teval(e1, p) = IntT orelse teval(e1,p) = BoolT orelse teval(e1,p) = ListT orelse teval(e1,p) = SeqT) then
+                            BoolT
+                        else raise NotEqTypes
+                    | ";" => teval(e2, p) (* 26 *)
+                    | _ => raise UnknownType
+            end
         | Item(i, exp) p => (* 25 *)
             let
                 fun getIndexElement(i, []) = raise ListOutOfRange
