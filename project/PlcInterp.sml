@@ -9,7 +9,7 @@ exception NotAFunc
 fun eval (e:expr, p:env) =
     case (e, p) of
         (Var x) p => lookup(p, x) (* 1 *)
-        (ConI x) _ => IntV x (* 2 *)
+        | (ConI x) _ => IntV x (* 2 *)
         | (ConB x) _ => BoolV x (* 3 e 4 *)
         | (List []) _ => ListV [] (* 5 *)
         | (List l) p => ListV map((fn x => eval(x, p)), l) (* 6 *)

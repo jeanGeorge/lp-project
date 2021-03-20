@@ -14,23 +14,6 @@ exception NotFunc
 exception ListOutOfRange
 exception OpNonList
 
-(*
-1-exception EmptySeq A sequência de entrada não contém nenhum elemento
-2-exception UnknownType- É usada nas situações onde nenhuma das específicas se encaixa.
-3-exception NotEqTypes- Se os tipos usados numa comparação são diferentes.
-4-exception WrongRetType- O tipo de retorno da função não condiz com o corpo da mesma.
-5-exception DiffBrTypes- Os tipos da expressões dos possíveis caminhos de um If divergem
-6-exception IfCondNotBool- A condição do if não é booleana
-7-exception NoMatchResults- Não há resultados para a expressão match
-8-exception MatchResTypeDiff- O tipo de algum dos casos em match difere dos demais
-9-exception MatchCondTypesDiff- O tipo das opções de match difere do tipo da expressão passada para Match
-10-exception CallTypeMisM- Você está passando pra uma chamada de função um tipo diferente do qual ela suporta
-11-exception NotFunc- Você está tentando chamar algo que não é uma função.
-12-exception ListOutOfRange- Tentativa de acessar um elemento fora dos limites da lista
-13-exception OpNonList- Tentativa de acessar um elemento em uma expressão que não é uma lista.
-*)
-
-
 fun teval (e:expr, p:env) =
     case (e,p) of
         (Var x) p => lookup (p,x) (* 1 *)
