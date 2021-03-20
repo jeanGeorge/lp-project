@@ -22,29 +22,29 @@ open PlcFrontEnd;
 
 fun run e =
     let
-        val tevalResult = val2string(teval e [])
-        val evalResult = type2string(eval e [])
+        val tevalResult = type2string(teval e [])
+        val evalResult = val2string(eval e [])
     in
         evalResult ^ " : " ^ tevalResult
     end
     handle
         (* PlcChecker.sml *)
-        EmptySeq => print("Error: EmptySeq")
-        | UnknownType => print("Error: UnknownType")
-        | NotEqTypes => print("Error: NotEqTypes")
-        | WrongRetType => print("Error: WrongRetType")
-        | DiffBrTypes => print("Error: DiffBrTypes")
-        | IfCondNotBool => print("Error: IfCondNotBool")
-        | NoMatchResults => print("Error: NoMatchResults")
-        | MatchResTypeDiff => print("Error: MatchResTypeDiff")
-        | MatchCondTypesDiff => print("Error: MatchCondTypesDiff")
-        | CallTypeMisM => print("Error: CallTypeMisM")
-        | ListOutOfRange => print("Error: ListOutOfRange")
-        | OpNonList => print("Error: OpNonList")
+        EmptySeq => "Error: EmptySeq"
+        | UnknownType => "Error: UnknownType"
+        | NotEqTypes => "Error: NotEqTypes"
+        | WrongRetType => "Error: WrongRetType"
+        | DiffBrTypes => "Error: DiffBrTypes"
+        | IfCondNotBool => "Error: IfCondNotBool"
+        | NoMatchResults => "Error: NoMatchResults"
+        | MatchResTypeDiff => "Error: MatchResTypeDiff"
+        | MatchCondTypesDiff => "Error: MatchCondTypesDiff"
+        | CallTypeMisM => "Error: CallTypeMisM"
+        | ListOutOfRange => "Error: ListOutOfRange"
+        | OpNonList => "Error: OpNonList"
         (* PlcInterp.sml *)
-        | HDEmptySeq => print("Error: HDEmptySeq")
-        | TLEmptySeq => print("Error: TLEmptySeq")
-        | ValueNotFoundInMatch => print("Error: ValueNotFoundInMatch")
-        | NotAFunc => print("Error: NotAFunc")
+        | HDEmptySeq => "Error: HDEmptySeq"
+        | TLEmptySeq => "Error: TLEmptySeq"
+        | ValueNotFoundInMatch => "Error: ValueNotFoundInMatch"
+        | NotAFunc => "Error: NotAFunc"
         (* Environ.sml *)
-        | SymbolNotFound => print("Error: SymbolNotFound")
+        | SymbolNotFound => "Error: SymbolNotFound"
