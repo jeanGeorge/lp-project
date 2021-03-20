@@ -21,7 +21,7 @@ fun eval (e:expr) (p:plcVal env) : plcVal =
                 ListV(unroll(l))
             end
         | (ESeq x) => SeqV [] (* 7 *)
-        | (Let (var, exp1, exp2)) => eval exp2 ((var, eval exp1 p) :: p)
+        | (Let (x, e1, e2)) => eval e2 ((x, eval e1 p) :: p)
         | (Letrec (f, argType, x, fType, e1, e2)) =>  eval e2 ((f, Clos(f, x, e1, p)) :: p)
         | (Anon (t, x, exp)) => Clos ("", x, exp, p)
         (*11 faltando -> call *)

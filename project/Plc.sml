@@ -20,31 +20,31 @@ Control.Print.stringDepth := 1000;
 
 open PlcFrontEnd;
 
-fun tevalAux(exp) = eval exp []
-    handle EmptySeq => print("Error: EmptySeq")
-    | UnknownType => print("Error: UnknownType")
-    | NotEqTypes => print("Error: NotEqTypes")
-    | WrongRetType => print("Error: WrongRetType")
-    | DiffBrTypes => print("Error: DiffBrTypes")
-    | IfCondNotBool => print("Error: IfCondNotBool")
-    | NoMatchResults => print("Error: NoMatchResults")
-    | MatchResTypeDiff => print("Error: MatchResTypeDiff")
-    | MatchCondTypesDiff => print("Error: MatchCondTypesDiff")
-    | CallTypeMisM => print("Error: CallTypeMisM")
-    | ListOutOfRange => print("Error: ListOutOfRange")
-    | OpNonList => print("Error: OpNonList")
-
-fun evalAux(exp) = eval exp []
-    handle Impossible => print("Error: Impossible")
-    | HDEmptySeq => print("Error: HDEmptySeq")
-    | TLEmptySeq => print("Error: TLEmptySeq")
-    | ValueNotFoundInMatch => print("Error: ValueNotFoundInMatch")
-    | NotAFunc => print("Error: NotAFunc")
-    | SymbolNotFound => print("Error: SymbolNotFound")
-
-fun run exp =
+fun run e =
     let
-        val type = tevalAux(exp)
-        val value = evalAux(exp)
+        val tevalResult = val2string(teval e [])
+        val evalResult = type2string(eval e [])
     in
-        val2string(type) ^ " : " ^ type2string(value)
+        evalResult ^ " : " ^ tevalResult
+    end
+    handle
+        (* PlcChecker.sml *)
+        EmptySeq => print("Error: EmptySeq")
+        | UnknownType => print("Error: UnknownType")
+        | NotEqTypes => print("Error: NotEqTypes")
+        | WrongRetType => print("Error: WrongRetType")
+        | DiffBrTypes => print("Error: DiffBrTypes")
+        | IfCondNotBool => print("Error: IfCondNotBool")
+        | NoMatchResults => print("Error: NoMatchResults")
+        | MatchResTypeDiff => print("Error: MatchResTypeDiff")
+        | MatchCondTypesDiff => print("Error: MatchCondTypesDiff")
+        | CallTypeMisM => print("Error: CallTypeMisM")
+        | ListOutOfRange => print("Error: ListOutOfRange")
+        | OpNonList => print("Error: OpNonList")
+        (* PlcInterp.sml *)
+        | HDEmptySeq => print("Error: HDEmptySeq")
+        | TLEmptySeq => print("Error: TLEmptySeq")
+        | ValueNotFoundInMatch => print("Error: ValueNotFoundInMatch")
+        | NotAFunc => print("Error: NotAFunc")
+        (* Environ.sml *)
+        | SymbolNotFound => print("Error: SymbolNotFound")
