@@ -193,6 +193,20 @@ fun eval (e:expr) (p:plcVal env) : plcVal =
                                 "::" => SeqV(ListV v1 :: v2)
                                 | _ => raise Impossible
                         end
+                    | (SeqV v1, SeqV v2) =>
+                        let in
+                            case oper of
+                                "=" => BoolV(v1 = v2)
+                                | "!=" => BoolV(v1 <> v2)
+                                | _ => raise Impossible
+                        end
+                    | (ListV v1, ListV v2) =>
+                        let in
+                            case oper of
+                                "=" => BoolV(v1 = v2)
+                                | "!=" => BoolV(v1 <> v2)
+                                | _ => raise Impossible
+                        end
                     | _ => raise Impossible
             end
 ;

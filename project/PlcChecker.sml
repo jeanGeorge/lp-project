@@ -193,15 +193,87 @@ fun teval (e:expr) (p:plcType env) : plcType =
                         else
                             raise UnknownType
                     | "=" => (* 24 *)
-                        if (teval e1 p) = (teval e2 p) andalso ((teval e1 p) = IntT orelse (teval e1 p) = BoolT) then
-                            BoolT
-                        else
-                            raise NotEqTypes
+                        let in
+                            case (teval e1 p) of
+                                IntT =>
+                                    if (teval e2 p) = IntT andalso (teval e1 p) = (teval e2 p) then
+                                        BoolT
+                                    else
+                                        raise NotEqTypes
+                                | BoolT =>
+                                    if (teval e2 p) = BoolT andalso (teval e1 p) = (teval e2 p) then
+                                        BoolT
+                                    else
+                                        raise NotEqTypes
+                                | SeqT t =>
+                                    let in
+                                        case t of
+                                            BoolT => BoolT
+                                            | IntT => BoolT
+                                            | ListT([]) => BoolT
+                                            | _ => raise NotEqTypes
+                                    end
+                                | ListT([]) =>
+                                    if (teval e2 p) = ListT([]) andalso (teval e1 p) = (teval e2 p) then
+                                        BoolT
+                                    else
+                                        raise NotEqTypes
+                                | ListT(types) =>
+                                    let
+                                        val aux = map(
+                                            fn(t) =>
+                                                case t of
+                                                    BoolT => BoolT
+                                                    | IntT => IntT
+                                                    | ListT([]) => ListT([])
+                                                    | _ => raise NotEqTypes
+                                        ) types
+                                    in
+                                        BoolT
+                                    end
+                                | _ => raise NotEqTypes
+                        end
                     | "!=" => (* 24 *)
-                        if (teval e1 p) = (teval e2 p) andalso ((teval e1 p) = IntT orelse (teval e1 p) = BoolT) then
-                            BoolT
-                        else
-                            raise NotEqTypes
+                        let in
+                            case (teval e1 p) of
+                                IntT =>
+                                    if (teval e2 p) = IntT andalso (teval e1 p) = (teval e2 p) then
+                                        BoolT
+                                    else
+                                        raise NotEqTypes
+                                | BoolT =>
+                                    if (teval e2 p) = BoolT andalso (teval e1 p) = (teval e2 p) then
+                                        BoolT
+                                    else
+                                        raise NotEqTypes
+                                | SeqT t =>
+                                    let in
+                                        case t of
+                                            BoolT => BoolT
+                                            | IntT => BoolT
+                                            | ListT([]) => BoolT
+                                            | _ => raise NotEqTypes
+                                    end
+                                | ListT([]) =>
+                                    if (teval e2 p) = ListT([]) andalso (teval e1 p) = (teval e2 p) then
+                                        BoolT
+                                    else
+                                        raise NotEqTypes
+                                | ListT(types) =>
+                                    let
+                                        val aux = map(
+                                            fn(t) =>
+                                                case t of
+                                                    BoolT => BoolT
+                                                    | IntT => IntT
+                                                    | ListT([]) => ListT([])
+                                                    | _ => raise NotEqTypes
+                                        ) types
+                                    in
+                                        BoolT
+                                    end
+                                | _ => raise NotEqTypes
+                        end
                     | ";" => (teval e2 p) (* 26 *)
                     | _ =>
                         raise UnknownType
