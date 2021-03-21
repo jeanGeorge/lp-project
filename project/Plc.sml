@@ -20,6 +20,26 @@ Control.Print.stringDepth := 1000;
 
 open PlcFrontEnd;
 
+val ExceptionMessageEmptySeq = "EXCEPTION: INPUT SEQUENCE IS EMPTY!"
+val ExceptionMessageUnknownType = "EXCEPTION: UNKNOWN EXCEPTION!"
+val ExceptionMessageNotEqTypes = "EXCEPTION: COMPARISON WITH NON EQUAL TYPES!"
+val ExceptionMessageWrongRetType = "EXCEPTION: FUNCTION RETURNING WRONG TYPE!"
+val ExceptionMessageDiffBrTypes = "EXCEPTION: CONDITION WITH DIFFERENT BRANCH TYPES!";
+val ExceptionMessageIfCondNotBool = "EXCEPTION: CONDITION IS NOT A BOOLEAN TYPE!"
+val ExceptionMessageNoMatchResults = "EXCEPTION: NO RESULTS FOR MATCH EXPRESSION!"
+val ExceptionMessageMatchResTypeDiff = "EXCEPTION: MATCH RETURNING DIFFERENT RESULT TYPES!"
+val ExceptionMessageMatchCondTypesDiff = "EXCEPTION: MATCH EXPRESSION TYPE DIFFER FROM CONDITION TYPE!"
+val ExceptionMessageCallTypeMisM = "EXCEPTION: WRONG ARGUMENT TYPE ON FUNCTION CALL!"
+val ExceptionMessageNotFunc = "EXCEPTION: TRYING TO CALL A NON FUNCTION TYPE! (TYPE CHECKER)"
+val ExceptionMessageListOutOfRange = "EXCEPTION: LIST INDEX OUT OF RANGE!"
+val ExceptionMessageOpNonList = "EXCEPTION: TRYING TO ACCESS INDEX OF A NON LIST EXPRESSION!"
+
+val ExceptionMessageImpossible = "EXCEPTION: IMPOSSIBLE EXCEPTION!"
+val ExceptionMessageHDEmptySeq = "EXCEPTION: TRYING TO ACCESS HEAD OF EMPTY SEQUENCE!"
+val ExceptionMessageTLEmptySeq = "EXCEPTION: TRYING TO ACCESS TAIL OF EMPTY SEQUENCE!"
+val ExceptionMessageValueNotFoundInMatch = "EXCEPTION: VALUE NOT FOUND IN MATCH EXPRESSION!"
+val ExceptionMessageNotAFunc = "EXCEPTION: TRYING TO CALL A NON FUNCTION TYPE! (INTERPRETER)"
+
 fun run e =
     let
         val tevalResult = type2string(teval e [])
@@ -29,7 +49,28 @@ fun run e =
     end
     handle
         (* PlcChecker.sml *)
-        EmptySeq => "Error: EmptySeq"
+        EmptySeq => raise EmptySeq
+        | UnknownType => raise UnknownType
+        | NotEqTypes => raise NotEqTypes
+        | WrongRetType => raise WrongRetType
+        | DiffBrTypes => raise DiffBrTypes
+        | IfCondNotBool => raise IfCondNotBool
+        | NoMatchResults => raise NoMatchResults
+        | MatchResTypeDiff => raise MatchResTypeDiff
+        | MatchCondTypesDiff => raise MatchCondTypesDiff
+        | CallTypeMisM => raise CallTypeMisM
+        | ListOutOfRange => raise ListOutOfRange
+        | OpNonList => raise OpNonList
+        (* PlcInterp.sml *)
+        | HDEmptySeq => raise HDEmptySeq
+        | TLEmptySeq => raise TLEmptySeq
+        | ValueNotFoundInMatch => raise ValueNotFoundInMatch
+        | NotAFunc => raise NotAFunc
+        (* Environ.sml *)
+        | SymbolNotFound => raise SymbolNotFound
+
+        (* voltar para: *)
+        (* EmptySeq => raise EmptySeq
         | UnknownType => "Error: UnknownType"
         | NotEqTypes => "Error: NotEqTypes"
         | WrongRetType => "Error: WrongRetType"
@@ -47,4 +88,4 @@ fun run e =
         | ValueNotFoundInMatch => "Error: ValueNotFoundInMatch"
         | NotAFunc => "Error: NotAFunc"
         (* Environ.sml *)
-        | SymbolNotFound => "Error: SymbolNotFound"
+        | SymbolNotFound => "Error: SymbolNotFound" *)

@@ -28,7 +28,7 @@ fun teval (e:expr) (p:plcType env) : plcType =
             end
         | ESeq (SeqT x) => SeqT x (* 7 *)
         | ESeq _ => raise EmptySeq (* 7 *)
-        | Let(x, e1, e2) => teval e2 ((x, teval e1 p) ::p) (* 8 *)
+        | Let(x, e1, e2) => teval e2 ((x, teval e1 p)::p)
         | Letrec(f, argType, arg, fType, e1, e2) => (* 9 *)
             let
                 val e1Type = teval e1 ((f, FunT(argType, fType))::(arg, argType)::p)
@@ -39,6 +39,7 @@ fun teval (e:expr) (p:plcType env) : plcType =
                 else
                     raise WrongRetType
             end
+        (* | Anon(t, x, e) => FunT(t, (teval e ((x,t)::p))) *)
         | Call(e2, e1) => (* 11 *)
             let in
                 case (teval e2 p) of
@@ -59,46 +60,49 @@ fun teval (e:expr) (p:plcType env) : plcType =
                             raise DiffBrTypes
                     | _ => raise IfCondNotBool
             end
-        | Match(exp, cases) =>
-            let
-                val expType = teval exp p
-                val firstCaseRespType = teval (#2 (hd cases)) p
-                fun checkCases (Match(exp, cases)) (p) =
-                    case cases of
-                        h::[] =>
+        | Match(e1, cases) =>
+            if cases <> [] then
+                let
+                    val expType = teval e1 p
+                    val firstCaseRespType = teval (#2 (hd cases)) p
+                    fun checkCases (Match(e1, cases)) (p) =
+                        case cases of
+                            h::[] =>
+                                let in
+                                    case h of
+                                        (SOME e2, e3) =>
+                                            if (teval e3 p) = firstCaseRespType then
+                                                if (teval e1 p) = (teval e2 p) then
+                                                    (teval e3 p)
+                                                else
+                                                    raise MatchCondTypesDiff
+                                            else
+                                                raise MatchResTypeDiff
+                                        | (NONE, e3) =>
+                                            if (teval e3 p) = firstCaseRespType then
+                                                firstCaseRespType
+                                            else
+                                                raise MatchResTypeDiff
+                                end
+                        | h::tail =>
                             let in
                                 case h of
-                                    (SOME e1, e2) =>
-                                        if (teval e2 p) = firstCaseRespType then
-                                            if (teval e1 p) = (teval e1 p) then
-                                                (teval e2 p)
+                                    (SOME e2, e3) =>
+                                        if (teval e3 p) = firstCaseRespType then
+                                            if (teval e1 p) = (teval e2 p) then
+                                                checkCases (Match(e1, tail)) p
                                             else
                                                 raise MatchCondTypesDiff
                                         else
                                             raise MatchResTypeDiff
-                                    | (NONE, e2) =>
-                                        if (teval e2 p) = firstCaseRespType then
-                                            firstCaseRespType
-                                        else
-                                            raise MatchResTypeDiff
+                                | _ => raise UnknownType
                             end
-                    | h::tail =>
-                        let in
-                            case h of
-                                (SOME e1, e2) =>
-                                    if (teval e2 p) = firstCaseRespType then
-                                        if (teval e1 p) = (teval e1 p) then
-                                            checkCases (Match(e1, tail)) p
-                                        else
-                                            raise MatchCondTypesDiff
-                                    else
-                                        raise MatchResTypeDiff
-                            | _ => raise UnknownType
-                        end
-                    | _ => raise NoMatchResults
-            in
-                checkCases (Match(exp, cases)) p
-            end
+                        | _ => raise NoMatchResults
+                in
+                    checkCases (Match(e1, cases)) p
+                end
+            else
+                raise NoMatchResults
         | Prim1(oper, e1) => (* 14, 15, 16, 17, 18, 19 *)
             let in
                 case oper of
@@ -111,16 +115,22 @@ fun teval (e:expr) (p:plcType env) : plcType =
                             IntT
                         else raise UnknownType
                     | "hd" => (* 16 *)
-                        let in
-                            case (teval e1 p) of
-                                (SeqT t) => t
-                                | _ => raise UnknownType
-                        end
+                        if e1 <> ESeq(teval e1 p) then
+                            let in
+                                case (teval e1 p) of
+                                    (SeqT t) => t
+                                    | _ => raise UnknownType
+                            end
+                        else
+                            raise EmptySeq
                     | "tl" => (* 17 *)
                         let in
-                            case (teval e1 p) of
-                                (SeqT t) => (SeqT t)
-                                | _ => raise UnknownType
+                            if e1 <> ESeq(teval e1 p) then
+                                case (teval e1 p) of
+                                    (SeqT t) => (SeqT t)
+                                    | _ => raise UnknownType
+                            else
+                                raise EmptySeq
                         end
                     | "ise" => (* 18 *)
                         let in
@@ -184,12 +194,12 @@ fun teval (e:expr) (p:plcType env) : plcType =
                             raise UnknownType
                     | "<" => (* 23 *)
                         if (teval e1 p) = IntT andalso (teval e2 p) = IntT then
-                            IntT
+                            BoolT
                         else
                             raise UnknownType
                     | "<=" => (* 23 *)
                         if (teval e1 p) = IntT andalso (teval e2 p) = IntT then
-                            IntT
+                            BoolT
                         else
                             raise UnknownType
                     | "=" => (* 24 *)
