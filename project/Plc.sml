@@ -25,26 +25,26 @@ fun run e =
         val tevalResult = type2string(teval e [])
         val evalResult = val2string(eval e [])
     in
-        evalResult ^ " : " ^ tevalResult
+        print(evalResult ^ " : " ^ tevalResult)
     end
     handle
         (* PlcChecker.sml *)
-        EmptySeq => raise EmptySeq
-        | UnknownType => "Error: UnknownType"
-        | NotEqTypes => "Error: NotEqTypes"
-        | WrongRetType => "Error: WrongRetType"
-        | DiffBrTypes => "Error: DiffBrTypes"
-        | IfCondNotBool => "Error: IfCondNotBool"
-        | NoMatchResults => "Error: NoMatchResults"
-        | MatchResTypeDiff => "Error: MatchResTypeDiff"
-        | MatchCondTypesDiff => "Error: MatchCondTypesDiff"
-        | CallTypeMisM => "Error: CallTypeMisM"
-        | ListOutOfRange => "Error: ListOutOfRange"
-        | OpNonList => "Error: OpNonList"
+        EmptySeq => print("Error: EmptySeq")
+        | UnknownType => print("Error: UnknownType")
+        | NotEqTypes => print("Error: NotEqTypes")
+        | WrongRetType => print("Error: WrongRetType")
+        | DiffBrTypes => print("Error: DiffBrTypes")
+        | IfCondNotBool => print("Error: IfCondNotBool")
+        | NoMatchResults => print("Error: NoMatchResults")
+        | MatchResTypeDiff => print("Error: MatchResTypeDiff")
+        | MatchCondTypesDiff => print("Error: MatchCondTypesDiff")
+        | CallTypeMisM => print("Error: CallTypeMisM")
+        | ListOutOfRange => print("Error: ListOutOfRange")
+        | OpNonList => print("Error: OpNonList")
         (* PlcInterp.sml *)
-        | HDEmptySeq => "Error: HDEmptySeq"
-        | TLEmptySeq => "Error: TLEmptySeq"
-        | ValueNotFoundInMatch => "Error: ValueNotFoundInMatch"
-        | NotAFunc => "Error: NotAFunc"
+        | HDEmptySeq => print("Error: HDEmptySeq")
+        | TLEmptySeq => print("Error: TLEmptySeq")
+        | ValueNotFoundInMatch => print("Error: ValueNotFoundInMatch")
+        | NotAFunc => print("Error: NotAFunc")
         (* Environ.sml *)
-        | SymbolNotFound => "Error: SymbolNotFound"
+        | SymbolNotFound => print("Error: SymbolNotFound")

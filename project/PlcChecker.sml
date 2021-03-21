@@ -26,7 +26,12 @@ fun teval (e:expr) (p:plcType env) : plcType =
             in
                 ListT mappedList
             end
-        | ESeq (SeqT x) => SeqT x (* 7 *)
+        | ESeq (SeqT x) =>
+            let in
+                case x of
+                    SeqT t => SeqT t
+                    | _ => raise EmptySeq
+            end
         | Let(x, e1, e2) => teval e2 ((x, teval e1 p)::p) (* 8 *)
         | Letrec(f, argType, arg, fType, e1, e2) => (* 9 *)
             let
