@@ -53,7 +53,7 @@ fun teval (e:expr) (p:plcType env) : plcType =
             let in
                 case (teval e1 p) of
                     BoolT =>
-                        if (teval e1 p) = teval e3 p then
+                        if (teval e2 p) = (teval e3 p) then
                             (teval e2 p)
                         else
                             raise DiffBrTypes
