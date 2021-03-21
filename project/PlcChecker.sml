@@ -16,19 +16,19 @@ exception OpNonList
 
 fun teval (e:expr) (p:plcType env) : plcType =
     case e of
-        (Var x) => lookup p x (* 1 *)
-        | (ConI _) => IntT (* 2 *)
-        | (ConB _) => BoolT (* 3 e 4 *)
-        | (List []) => ListT [] (* 5 *)
-        | (List l) => (* 6 *)
+        Var x => lookup p x (* 1 *)
+        | ConI _ => IntT (* 2 *)
+        | ConB _ => BoolT (* 3 e 4 *)
+        | List [] => ListT [] (* 5 *)
+        | List l => (* 6 *)
             let
                 val mappedList = map(fn x => teval x p) l
             in
                 ListT mappedList
             end
-        | (ESeq (SeqT x)) => SeqT x (* 7 *)
-        | (ESeq _) => raise EmptySeq
-        | (Let(x, e1, e2)) => teval e2 ((x, teval e1 p) ::p ) (* 8 *)
+        | ESeq (SeqT x) => SeqT x (* 7 *)
+        | ESeq _ => raise EmptySeq (* 7 *)
+        | Let(x, e1, e2) => teval e2 ((x, teval e1 p) ::p) (* 8 *)
         | Letrec(f, argType, arg, fType, e1, e2) => (* 9 *)
             let
                 val e1Type = teval e1 ((f, FunT(argType, fType))::(arg, argType)::p)
@@ -140,7 +140,7 @@ fun teval (e:expr) (p:plcType env) : plcType =
                         else raise UnknownType
                     | "::" => (* 21 *)
                         let in
-                            case (teval e1 p, (teval e2 p)) of
+                            case (teval e1 p, teval e2 p) of
                                 (IntT, ListT []) =>
                                     SeqT IntT
                                 | (IntT, SeqT t) =>
@@ -166,11 +166,13 @@ fun teval (e:expr) (p:plcType env) : plcType =
                     | "+" => (* inicio 22 *)
                         if (teval e1 p) = IntT andalso (teval e2 p) = IntT then
                             IntT
-                        else raise UnknownType
+                        else
+                            raise UnknownType
                     | "-" =>
                         if (teval e1 p) = IntT andalso (teval e2 p) = IntT then
                             IntT
-                        else raise UnknownType
+                        else
+                            raise UnknownType
                     | "*" =>
                         if (teval e1 p) = IntT andalso (teval e2 p) = IntT then
                             IntT
@@ -178,25 +180,31 @@ fun teval (e:expr) (p:plcType env) : plcType =
                     | "/" => (* fim 22 *)
                         if (teval e1 p) = IntT andalso (teval e2 p) = IntT then
                             IntT
-                        else raise UnknownType
+                        else
+                            raise UnknownType
                     | "<" => (* 23 *)
                         if (teval e1 p) = IntT andalso (teval e2 p) = IntT then
                             IntT
-                        else raise UnknownType
+                        else
+                            raise UnknownType
                     | "<=" => (* 23 *)
                         if (teval e1 p) = IntT andalso (teval e2 p) = IntT then
                             IntT
-                        else raise UnknownType
+                        else
+                            raise UnknownType
                     | "=" => (* 24 *)
                         if (teval e1 p) = (teval e2 p) andalso ((teval e1 p) = IntT orelse (teval e1 p) = BoolT) then
                             BoolT
-                        else raise NotEqTypes
+                        else
+                            raise NotEqTypes
                     | "!=" => (* 24 *)
                         if (teval e1 p) = (teval e2 p) andalso ((teval e1 p) = IntT orelse (teval e1 p) = BoolT) then
                             BoolT
-                        else raise NotEqTypes
+                        else
+                            raise NotEqTypes
                     | ";" => (teval e2 p) (* 26 *)
-                    | _ => raise UnknownType
+                    | _ =>
+                        raise UnknownType
             end
         | Item(i, exp) => (* 25 *)
             let
