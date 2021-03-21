@@ -19,10 +19,10 @@ fun eval (e:expr) (p:plcVal env) : plcVal =
                 ListV mappedList
             end
         | ESeq x => SeqV [] (* 7 *)
-        | Let(x, e1, e2) => eval e2 ((x, eval e1 p) :: p)
-        | Letrec(f, argType, x, fType, e1, e2) =>  eval e2 ((f, Clos(f, x, e1, p)) :: p)
-        | Anon(t, x, exp) => Clos ("", x, exp, p)
-        | Call(e1, e2) =>
+        | Let(x, e1, e2) => eval e2 ((x, eval e1 p) :: p) (* 8 *)
+        | Letrec(f, argType, x, fType, e1, e2) =>  eval e2 ((f, Clos(f, x, e1, p)) :: p) (* 9 *)
+        | Anon(t, x, exp) => Clos ("", x, exp, p) (* 10 *)
+        | Call(e1, e2) => (* 11 *)
             let
                 fun aux (List((h::[]))) = [eval h p]
                     | aux (List(h::tail)) = [eval h p] @ aux(List tail)
@@ -40,7 +40,7 @@ fun eval (e:expr) (p:plcVal env) : plcVal =
                     | BoolV false => eval e3 p
                     | _ => raise Impossible
             end
-        | Match (e1, matchList) =>
+        | Match (e1, matchList) => (* 13 *)
             let
                 fun checkCases (x, h::[]) p =
                     let in

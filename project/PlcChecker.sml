@@ -16,7 +16,7 @@ exception OpNonList
 
 fun teval (e:expr) (p:plcType env) : plcType =
     case e of
-        Var x => lookup p x
+        Var x => lookup p x (* 1 *)
         | ConI _ => IntT (* 2 *)
         | ConB _ => BoolT (* 3 e 4 *)
         | List [] => ListT [] (* 5 *)
@@ -26,8 +26,8 @@ fun teval (e:expr) (p:plcType env) : plcType =
             in
                 ListT mappedList
             end
-        | ESeq (SeqT x) => SeqT x
-        | Let(x, e1, e2) => teval e2 ((x, teval e1 p)::p)
+        | ESeq (SeqT x) => SeqT x (* 7 *)
+        | Let(x, e1, e2) => teval e2 ((x, teval e1 p)::p) (* 8 *)
         | Letrec(f, argType, arg, fType, e1, e2) => (* 9 *)
             let
                 val e1Type = teval e1 ((f, FunT(argType, fType))::(arg, argType)::p)
@@ -38,7 +38,7 @@ fun teval (e:expr) (p:plcType env) : plcType =
                 else
                     raise WrongRetType
             end
-        | Anon(t, x, e) => FunT(t, (teval e ((x,t)::p)))
+        | Anon(t, x, e) => FunT(t, (teval e ((x,t)::p))) (* 10 *)
         | Call(e2, e1) => (* 11 *)
             let in
                 case (teval e2 p) of
@@ -59,7 +59,7 @@ fun teval (e:expr) (p:plcType env) : plcType =
                             raise DiffBrTypes
                     | _ => raise IfCondNotBool
             end
-        | Match (exp, cases) =>
+        | Match(exp, cases) => (* 13 *)
             if cases = [] then
                 raise NoMatchResults
             else
