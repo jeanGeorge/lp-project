@@ -47,6 +47,7 @@ fun testCases (sourceCode:string, expected:string) : string =
     | TLEmptySeq => if (ExceptionMessageTLEmptySeq = expected) then "V" else sourceCode
     | ValueNotFoundInMatch => if (ExceptionMessageValueNotFoundInMatch = expected) then "V" else sourceCode
     | NotAFunc => if (ExceptionMessageNotAFunc = expected) then "V" else sourceCode
+    | SymbolNotFound => if (ExceptionMessageSymbolNotFound = expected) then "V" else sourceCode
 
 val results = map (fn (s,e) => testCases(s, e)) cases;
 

@@ -16,7 +16,7 @@ exception OpNonList
 
 fun teval (e:expr) (p:plcType env) : plcType =
     case e of
-        Var x => lookup p x (* 1 *)
+        Var x => lookup p x
         | ConI _ => IntT (* 2 *)
         | ConB _ => BoolT (* 3 e 4 *)
         | List [] => ListT [] (* 5 *)
@@ -26,8 +26,7 @@ fun teval (e:expr) (p:plcType env) : plcType =
             in
                 ListT mappedList
             end
-        | ESeq (SeqT x) => SeqT x (* 7 *)
-        | ESeq _ => raise EmptySeq (* 7 *)
+        | ESeq (SeqT x) => SeqT x
         | Let(x, e1, e2) => teval e2 ((x, teval e1 p)::p)
         | Letrec(f, argType, arg, fType, e1, e2) => (* 9 *)
             let
@@ -39,7 +38,7 @@ fun teval (e:expr) (p:plcType env) : plcType =
                 else
                     raise WrongRetType
             end
-        (* | Anon(t, x, e) => FunT(t, (teval e ((x,t)::p))) *)
+        | Anon(t, x, e) => FunT(t, (teval e ((x,t)::p)))
         | Call(e2, e1) => (* 11 *)
             let in
                 case (teval e2 p) of
@@ -60,49 +59,47 @@ fun teval (e:expr) (p:plcType env) : plcType =
                             raise DiffBrTypes
                     | _ => raise IfCondNotBool
             end
-        | Match(e1, cases) =>
-            if cases <> [] then
-                let
-                    val expType = teval e1 p
-                    val firstCaseRespType = teval (#2 (hd cases)) p
-                    fun checkCases (Match(e1, cases)) (p) =
-                        case cases of
-                            h::[] =>
-                                let in
-                                    case h of
-                                        (SOME e2, e3) =>
-                                            if (teval e3 p) = firstCaseRespType then
-                                                if (teval e1 p) = (teval e2 p) then
-                                                    (teval e3 p)
-                                                else
-                                                    raise MatchCondTypesDiff
-                                            else
-                                                raise MatchResTypeDiff
-                                        | (NONE, e3) =>
-                                            if (teval e3 p) = firstCaseRespType then
-                                                firstCaseRespType
-                                            else
-                                                raise MatchResTypeDiff
-                                end
-                        | h::tail =>
-                            let in
-                                case h of
-                                    (SOME e2, e3) =>
-                                        if (teval e3 p) = firstCaseRespType then
-                                            if (teval e1 p) = (teval e2 p) then
-                                                checkCases (Match(e1, tail)) p
-                                            else
-                                                raise MatchCondTypesDiff
-                                        else
-                                            raise MatchResTypeDiff
-                                | _ => raise UnknownType
-                            end
-                        | _ => raise NoMatchResults
-                in
-                    checkCases (Match(e1, cases)) p
-                end
-            else
+        | Match (exp, cases) =>
+            if cases = [] then
                 raise NoMatchResults
+            else
+                let
+                    val expType = teval exp p
+                    val firstResult = (#2 (hd cases))
+                    val firstResultType = teval firstResult p
+                    fun readList(h::[]) =
+                        let in
+                            case h of
+                                (SOME e, res) =>
+                                    if teval e p <> expType then
+                                        raise MatchCondTypesDiff
+                                    else
+                                        if (teval res p) <> firstResultType then
+                                            raise MatchResTypeDiff
+                                        else
+                                            firstResultType
+                                | (NONE, res) =>
+                                    if (teval res p) <> firstResultType then
+                                        raise MatchResTypeDiff
+                                    else
+                                        firstResultType
+                        end
+                    | readList(h::tail) =
+                        let in
+                            case h of
+                                (SOME e, res) =>
+                                    if (teval e p) <> expType then
+                                        raise MatchCondTypesDiff
+                                    else
+                                        if (teval res p) <> firstResultType then
+                                            raise MatchResTypeDiff
+                                        else
+                                            readList(tail)
+                                | _ => raise UnknownType
+                        end
+                in
+                    readList(cases)
+                end
         | Prim1(oper, e1) => (* 14, 15, 16, 17, 18, 19 *)
             let in
                 case oper of

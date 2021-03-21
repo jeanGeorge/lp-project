@@ -209,4 +209,22 @@ fun eval (e:expr) (p:plcVal env) : plcVal =
                         end
                     | _ => raise Impossible
             end
+        | Item(i, exp) => (* 25 *)
+            let
+                fun getIndexElement(i, []) = raise Impossible
+                    | getIndexElement(i, (h::[])) =
+                        if i = 1 then
+                            h
+                        else
+                            raise Impossible
+                    | getIndexElement(i, (h::tail)) =
+                        if i = 1 then
+                            h
+                        else
+                            getIndexElement(i - 1, tail)
+            in
+                case eval exp p of
+                    ListV x => getIndexElement(i, x)
+                    | _ => raise Impossible
+            end
 ;

@@ -20,6 +20,7 @@ Control.Print.stringDepth := 1000;
 
 open PlcFrontEnd;
 
+val ExceptionMessageSymbolNotFound = "EXCEPTION: MESSAGE SYMBOL NOT FOUND!"
 val ExceptionMessageEmptySeq = "EXCEPTION: INPUT SEQUENCE IS EMPTY!"
 val ExceptionMessageUnknownType = "EXCEPTION: UNKNOWN EXCEPTION!"
 val ExceptionMessageNotEqTypes = "EXCEPTION: COMPARISON WITH NON EQUAL TYPES!"
