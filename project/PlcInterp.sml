@@ -69,7 +69,7 @@ fun eval (e:expr) (p:plcVal env) : plcVal =
             in
                 eval (checkCases ((eval e1 p), matchList) p) p
             end
-        | Prim1(oper, exp) => (* 14, 15, 16, 17, 18, 19 validar hd , tl e print *)
+        | Prim1(oper, exp) => (* 14, 15, 16, 17, 18, 19 *)
             let in
                 case eval exp p of
                     IntV x =>
